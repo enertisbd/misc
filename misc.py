@@ -350,7 +350,7 @@ def dms2deg(val, units=True):
             Returns the converted coordinate.
     '''
     direction = {'N':1.0, 'S':-1.0, 'E': 1.0, 'W':-1.0}
-    if units: ncoordew = val.replace(u'°',' ').replace('\'',' ').replace('"',' ')
+    if units: coord = val.replace(u'°',' ').replace('\'',' ').replace('"',' ')
     else:     coord = val[0:2] + ' ' + val[2:4] + ' ' + val[4:-1] + ' ' + val[-1:]
     coord    = coord.split()
     cood_dir = coord.pop()
