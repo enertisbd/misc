@@ -136,16 +136,17 @@ def to_numeric_col(col, comma_as_thousand=True, fillna=None):
     col_str = col.astype(str)
 
     # Check if commas and dots are found in the numbers =================================    
-    has_comma = False if col_str.str.contains(',').sum() == 0 else True
-    has_dot   = False if col_str.str.contains('.').sum() == 0 else True
+    # REMINDER: str.contains is regex-based so the '.' must be escaped with '\'
+    has_comma = False if col_str.str.contains(',' ).sum() == 0 else True
+    has_dot   = False if col_str.str.contains('\.').sum() == 0 else True
     
     # If commas and dots are found, we adjust the column to endup with
     # dots as decimal separators 
     if has_comma and has_dot:
         if comma_as_thousand: 
-            col_str = col_str.str.replace(',','')
+            col_str = col_str.str.replace(',','' )
         else:                 
-            col_str = col_str.str.replace('.','')
+            col_str = col_str.str.replace('.','' ) 
             col_str = col_str.str.replace(',','.')
     elif has_comma:
         col_str = col_str.str.replace(',','.')
