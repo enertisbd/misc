@@ -285,6 +285,10 @@ def rmv_duplicates_dict_of_lists (lst_dict):
     d_final.append(lst_dict[-1])
     return d_final
 
+def is_int (val):
+    '''Return True if the string provided is an integer and False otherwise.'''
+    return True if re.match("^\d+?", val) is not None else False
+
 
 def to_numeric (val):
     ''' Converts a single value to numeric if possible.
@@ -301,6 +305,7 @@ def to_numeric (val):
     if   re.match("^\d+?"       , val) is not None: return int  (val)
     elif re.match("^\d+?\.\d+?$", val) is not None: return float(val)
     return val
+
 
 def zfill(s, n_pad=3):
     ''' Fills float number with zero padding.    
