@@ -7,7 +7,7 @@
 ## Date  : 22.10.2018
 ##
 
-import os, re, logging
+import os, re, logging, copy
 
 from utils import global_defs  as glb
 if glb.USE_MODIN: import modin.pandas as pd
@@ -267,3 +267,38 @@ def remove_colums_by_type (df, ctypes_rmv):
     cType_service = glb.id_col_std(df.columns)
     valid_cols    = [c for c in df.columns if cType_service[c] not in ctypes_rmv]    
     return df[ valid_cols ]
+
+
+def get_typical_year (df, freq, aggs):
+    ''' Builds a typical year DataFrame.
+        It can be used to compute TMYs, TSYs, etc.        
+
+        Parameters
+        ----------
+        df : DataFrame
+            The DataFrame of reference.
+        freq : str
+            The alias of the frequency expected in the typical year. Ex: '1M', '1D'.
+        aggs : dict
+            A dictionary with the aggregations to be performed.
+    '''
+    df_tsy = df[aggs.keys()].copy()
+    df_tsy['minute'] = df.index.minute
+    df_tsy['hour'  ] = df.index.hour
+    df_tsy['day'   ] = df.index.day
+    df_tsy['month' ] = df.index.month
+    df_tsy['date'  ] = pd.to_datetime('1996-' + df.index.strftime('%m-%d %H:%M'))
+
+    # Groupby month, day, hour and minute to handle DataFrame with different years
+    aggs_ = copy.deepcopy(aggs)
+    aggs_.update({'date':'first'})
+    df_tsy = df_tsy.groupby(['month', 'day', 'hour', 'minute'], as_index=False).agg(aggs_)
+    df_tsy.set_index('date', inplace=True)
+
+    # Resampling monthly
+    aggs.pop('date', None)
+    df_tsy = df_tsy.resample(freq).agg(aggs)
+    df_tsy['hour'  ] = df_tsy.index.hour
+    df_tsy['day'   ] = df_tsy.index.day
+    df_tsy['month' ] = df_tsy.index.month
+    return df_tsy
